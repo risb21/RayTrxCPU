@@ -1,14 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include "vec3.h"
+#include "colour.h"
 
 using namespace std;
 
 /* Function for each thread to execute, sets colour of each pixel */
-void thread_fn(unsigned char *arr, int x, int y, int mx, int my) {
-    arr[(y*mx + x)*3 + 0] = char(float(x) / mx * 255.99);
-    arr[(y*mx + x)*3 + 1] = char(float(y) / my * 255.99);
-    arr[(y*mx + x)*3 + 2] = char(float(0.2 * 255.99));
+void thread_fn(colour *arr, int x, int y, int mx, int my) {
+    arr[y*mx + x] = colour( float(x) / mx, float(y) / my, 0.2);
 }
 
 int main() {
@@ -18,16 +18,16 @@ int main() {
     int ty = 4;
 
     // Image dimensions
-    int dimx = 1200;
-    int dimy = 600;
+    int dimx = 512;
+    int dimy = 512;
 
     cout << "Making a " << dimx << "x" << dimy << " image\n";
 
     // Allocating the pixel array on the heap
-    unsigned char *farr = (unsigned char *) malloc(dimy * dimx * 3 * sizeof(unsigned char));
+    colour *parr = (colour *) malloc(dimy * dimx * sizeof(colour));
 
     // Failed to allocate pixel array
-    if (!farr) {
+    if (!parr) {
         cout << stderr << ": Out of memory!\n";
         exit(1);
     }
@@ -42,7 +42,7 @@ int main() {
             // Threads iteration
             for (int thry = 0; thry < ty; thry++) {
                 for (int thrx = 0; thrx < tx; thrx++) {
-                    tarr[thry][thrx] = thread(thread_fn, farr, bx*tx + thrx, by*ty + thry, dimx, dimy);
+                    tarr[thry][thrx] = thread(thread_fn, parr, bx*tx + thrx, by*ty + thry, dimx, dimy);
                     tarr[thry][thrx].join();
                 }
             }
@@ -56,15 +56,10 @@ int main() {
     char writefile[] = "result4.ppm";
     ppm = fopen(writefile, "w");
     fprintf(ppm, "P3\n%d %d\n255\n", dimx, dimy);
-
-    int r, g, b;
     
     for (int i = 0; i < dimy; i++) {
         for (int j = 0; j < dimx; j++) {
-            r = int(farr[(i*dimx + j)*3 + 0]);
-            g = int(farr[(i*dimx + j)*3 + 1]);
-            b = int(farr[(i*dimx + j)*3 + 2]);
-            fprintf(ppm, "%d %d %d\n", r, g, b);
+            write_colour(ppm, parr[i*dimx + j]);
         }
     }
     fclose(ppm);
