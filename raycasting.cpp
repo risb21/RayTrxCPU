@@ -1,29 +1,18 @@
-#include "colour.h"
-#include "ray.h"
-#include "vec3.h"
+#include "headers/consts.h"
+
+#include "headers/colour.h"
+#include "headers/hittable_list.h"
+#include "headers/sphere.h"
 
 #include <iostream>
 
-float hit_sphere(const point3& center, float radius, const ray& r) {
-    point3 oc = r.origin() - center;
-    float a = r.direction().len_sq();
-    float half_b = dot(oc, r.direction());
-    float c = oc.len_sq() - radius*radius;
-    float discriminant = half_b*half_b - a*c;
-    if (discriminant < 0) {
-        return -1.0f;
-    }
-    return (-half_b - sqrt(discriminant)) / a;
-}
-
-colour ray_colour(const ray& r) {
-    float t = hit_sphere(point3(0,0,-1), 0.5, r);
-    if (t > 0.0f) {
-        vec3 N = unit_vector(r.at(t) - vec3(0,0,-1));
-        return 0.5f * colour(N.x()+1, N.y()+1, N.z()+1);
+colour ray_colour(const ray& r, const hittable& world) {
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (rec.normal + colour(1, 1, 1));
     }
     vec3 unit_direction = unit_vector(r.direction());
-    t = 0.5*(unit_direction.y() + 1.0);
+    float t = 0.5*(unit_direction.y() + 1.0);
     return (1.0 - t) * colour(1.0, 1.0, 1.0) + t * colour(0.5, 0.7, 1.0);
 }
 
@@ -34,6 +23,11 @@ int main() {
     const int img_w = 1920;
     const int img_h = static_cast<int>(img_w / aspect_ratio);
 
+    // World definition
+    hittable_list world;
+    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
+    world.add(make_shared<sphere>(point3(0, -5.5, -1), 5));
+    
     // Camera properties
     float viewport_h = 2.0;
     float viewport_w = aspect_ratio * viewport_h;
@@ -47,7 +41,7 @@ int main() {
     // Rendering
 
     FILE* ppm;
-    char write_file[] = "ballNormals.ppm";
+    char write_file[] = "ballsNormals5.ppm";
     ppm = fopen(write_file, "w");
     fprintf(ppm, "P3\n%d %d\n255\n", img_w, img_h);
     
@@ -58,7 +52,7 @@ int main() {
             u = float(j) / (img_w - 1);
             v = float(i) / (img_h - 1);
             ray r(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            colour pixel = ray_colour(r);
+            colour pixel = ray_colour(r, world);
             write_colour(ppm, pixel);
         }
     }
