@@ -40,7 +40,8 @@ bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const 
 
     rec.t = root;                               // Length of ray where sphere intersection happens
     rec.p = r.at(root);                         // Point of sphere intersection
-    rec.normal = (rec.p - center) / radius;     // Normal at point p
+    vec3 outward_normal = (rec.p - center) / radius;     // Normal at point p
+    rec.set_face_normal(r, outward_normal);
 
     return true;
 }   
