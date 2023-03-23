@@ -7,10 +7,16 @@
 
 #include <iostream>
 
-colour ray_colour(const ray& r, const hittable& world) {
+colour ray_colour(const ray& r, const hittable& world, int depth) {
     hit_record rec;
-    if (world.hit(r, 0, infinity, rec)) {
-        return 0.5 * (rec.normal + colour(1, 1, 1));
+
+    if (depth <= 0) {
+        return colour(0, 0, 0);
+    }
+
+    if (world.hit(r, 0.001, infinity, rec)) {
+        point3 target = rec.p + rec.normal + random_in_unit_sphere();
+        return 0.5 * ray_colour(ray(rec.p, target - rec.p), world, depth-1);
     }
     vec3 unit_direction = unit_vector(r.direction());
     float t = 0.5*(unit_direction.y() + 1.0);
@@ -24,6 +30,7 @@ int main() {
     const int img_w = 1920;
     const int img_h = static_cast<int>(img_w / aspect_ratio);
     const int samples_per_pixel = 100;
+    const int max_depth = 50;
     
     // World definition
     hittable_list world;
@@ -46,7 +53,7 @@ int main() {
     // Rendering
 
     FILE* ppm;
-    char write_file[] = "3ballsNormals.ppm";
+    char write_file[] = "3LambertianDiffuse.ppm";
     ppm = fopen(write_file, "w");
     fprintf(ppm, "P3\n%d %d\n255\n", img_w, img_h);
     
@@ -60,7 +67,7 @@ int main() {
                 u = float(j + rand_float()) / (img_w - 1);
                 v = float(i + rand_float()) / (img_h - 1);
                 r = cam.get_ray(u, v);
-                pixel += ray_colour(r, world);
+                pixel += ray_colour(r, world, max_depth);
             }
             write_colour(ppm, pixel, samples_per_pixel);
         }

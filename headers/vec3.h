@@ -12,11 +12,8 @@ class vec3 {
 public:
     float v[3];
 
-    vec3(float x = 0, float y = 0, float z = 0) {
-        v[0] = x;
-        v[1] = y;
-        v[2] = z;
-    }
+    vec3() : v{0, 0, 0} {}
+    vec3(float v1, float v2, float v3) : v{v1, v2, v3} {}
 
     float x() { return v[0]; }
     float y() { return v[1]; }
@@ -44,6 +41,14 @@ public:
 
     float len_sq() const { return v[0]*v[0] + v[1]*v[1]+ v[2]*v[2]; }
     float len() const { return sqrt(len_sq()); }
+
+    inline static vec3 random() {
+        return vec3(rand_float(), rand_float(), rand_float());
+    }
+
+    inline static vec3 random(float min, float max) {
+        return vec3(rand_float(min, max), rand_float(min, max), rand_float(min, max));
+    }
 
 };
 
@@ -88,6 +93,16 @@ inline vec3 cross(const vec3 &a, const vec3 &b) {
 
 inline vec3 unit_vector(vec3 a) {
     return a / a.len();
+}
+
+vec3 random_in_unit_sphere() {
+    while (1) {
+        vec3 p = vec3::random(-1, 1);
+        if (p.len_sq() >= 1) {
+            continue;
+        }
+        return p;
+    }
 }
 
 using point3 = vec3;
