@@ -3,6 +3,7 @@
 #include "headers/colour.h"
 #include "headers/hittable_list.h"
 #include "headers/sphere.h"
+#include "headers/camera.h"
 
 #include <iostream>
 
@@ -22,7 +23,8 @@ int main() {
     const float aspect_ratio = 16.0 / 9.0;
     const int img_w = 1920;
     const int img_h = static_cast<int>(img_w / aspect_ratio);
-
+    const int samples_per_pixel = 100;
+    
     // World definition
     hittable_list world;
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
@@ -31,6 +33,7 @@ int main() {
     world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
     
     // Camera properties
+    camera cam;
     float viewport_h = 2.0;
     float viewport_w = aspect_ratio * viewport_h;
     float focal_len = 1.0;
@@ -48,14 +51,18 @@ int main() {
     fprintf(ppm, "P3\n%d %d\n255\n", img_w, img_h);
     
     float u, v;
+    ray r;
     for (int i = img_h - 1; i >= 0; i--) {
         cout << "\rScanlines remaining: " << i << " " << flush;
         for (int j = 0; j < img_w; j++) {
-            u = float(j) / (img_w - 1);
-            v = float(i) / (img_h - 1);
-            ray r(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            colour pixel = ray_colour(r, world);
-            write_colour(ppm, pixel);
+            colour pixel(0, 0, 0);
+            for (int s = 0; s < samples_per_pixel; s++) {
+                u = float(j + rand_float()) / (img_w - 1);
+                v = float(i + rand_float()) / (img_h - 1);
+                r = cam.get_ray(u, v);
+                pixel += ray_colour(r, world);
+            }
+            write_colour(ppm, pixel, samples_per_pixel);
         }
     }
 
