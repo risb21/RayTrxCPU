@@ -26,7 +26,9 @@ int main() {
     // World definition
     hittable_list world;
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.add(make_shared<sphere>(point3(0, -5.5, -1), 5));
+    world.add(make_shared<sphere>(point3(1.2, 0, -1.5), 0.5));
+    world.add(make_shared<sphere>(point3(-1.2, 0, -1.5), 0.5));
+    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
     
     // Camera properties
     float viewport_h = 2.0;
@@ -41,7 +43,7 @@ int main() {
     // Rendering
 
     FILE* ppm;
-    char write_file[] = "ballsNormals5.ppm";
+    char write_file[] = "3ballsNormals.ppm";
     ppm = fopen(write_file, "w");
     fprintf(ppm, "P3\n%d %d\n255\n", img_w, img_h);
     
