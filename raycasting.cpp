@@ -15,7 +15,7 @@ colour ray_colour(const ray& r, const hittable& world, int depth) {
     }
 
     if (world.hit(r, 0.001, infinity, rec)) {
-        point3 target = rec.p + rec.normal + random_in_unit_sphere();
+        point3 target = rec.p + rec.normal + random_unit_vector();
         return 0.5 * ray_colour(ray(rec.p, target - rec.p), world, depth-1);
     }
     vec3 unit_direction = unit_vector(r.direction());
@@ -27,7 +27,7 @@ int main() {
     
     // Image properties
     const float aspect_ratio = 16.0 / 9.0;
-    const int img_w = 1920;
+    const int img_w = 400;
     const int img_h = static_cast<int>(img_w / aspect_ratio);
     const int samples_per_pixel = 100;
     const int max_depth = 50;
@@ -53,7 +53,7 @@ int main() {
     // Rendering
 
     FILE* ppm;
-    char write_file[] = "3LambertianDiffuse.ppm";
+    char write_file[] = "true3LambertianDiffuse.ppm";
     ppm = fopen(write_file, "w");
     fprintf(ppm, "P3\n%d %d\n255\n", img_w, img_h);
     
