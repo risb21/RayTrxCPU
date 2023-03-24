@@ -50,6 +50,11 @@ public:
         return vec3(rand_float(min, max), rand_float(min, max), rand_float(min, max));
     }
 
+    bool near_zero() const {
+        const float lim = 1e-8;
+        return (fabs(v[0]) < lim) && (fabs(v[1]) < lim) && (fabs(v[2]) < lim);
+    }
+
 };
 
 // Utility functions
@@ -107,6 +112,10 @@ vec3 random_in_unit_sphere() {
 
 vec3 random_unit_vector() {
     return unit_vector(random_in_unit_sphere());
+}
+
+vec3 reflect(const vec3& v, const vec3& n) {
+    return v - 2*dot(v, n)*n;
 }
 
 using point3 = vec3;
